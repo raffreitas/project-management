@@ -3,15 +3,42 @@ import NewProject, { Project } from "./components/NewProject"
 import NoProjectSelected from "./components/NoProjectSelected"
 import ProjectsSidebar from "./components/ProjectsSidebar"
 import SelectedProject from "./components/SelectedProject"
+import { Task } from "./components/NewTask"
 
 function App() {
   const [projectsState, setProjectsState] = useState<{
     selectedProjectId: number | null | undefined,
-    projects: Project[]
+    projects: Project[],
+    tasks: Task[]
   }>({
     selectedProjectId: undefined,
-    projects: []
+    projects: [],
+    tasks: []
   })
+
+  function handleAddTask(text: string) {
+    const taskId = Math.random()
+    const newTask = {
+      id: taskId,
+      projectId: projectsState.selectedProjectId!,
+      text: text
+    }
+    setProjectsState((prevState) => {
+      return {
+        ...prevState,
+        tasks: [...prevState.tasks, newTask]
+      }
+    })
+  }
+
+  function handleDeleteTask(id: number) {
+    setProjectsState((prevState) => {
+      return {
+        ...prevState,
+        tasks: prevState.tasks.filter(task => task.id !== id)
+      }
+    })
+  }
 
   function handleDeleteProject(id?: number) {
     setProjectsState((prevState) => {
@@ -68,7 +95,15 @@ function App() {
 
   const selectedProject = projectsState.projects.find(project => project.id === projectsState.selectedProjectId)
 
-  let content = <SelectedProject project={selectedProject} onDelete={handleDeleteProject} />
+  let content = (
+    <SelectedProject
+      project={selectedProject}
+      tasks={projectsState.tasks}
+      onDelete={handleDeleteProject}
+      onAddTask={handleAddTask}
+      onDeleteTask={handleDeleteTask}
+    />
+  )
 
   if (projectsState.selectedProjectId === null) {
     content = <NewProject onAdd={handleAddProject} onCancel={handleCancelAddProject} />
