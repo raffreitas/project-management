@@ -1,8 +1,10 @@
 import { useRef } from "react";
 import Input from "./Input";
+import Modal from "./Modal";
 
 type NewProjectProps = {
   onAdd: (project: Project) => void
+  onCancel: () => void
 }
 
 export type Project = {
@@ -12,7 +14,9 @@ export type Project = {
   dueDate: string
 }
 
-export default function NewProject({ onAdd }: NewProjectProps) {
+export default function NewProject({ onAdd, onCancel }: NewProjectProps) {
+  const modal = useRef<HTMLDialogElement>(null)
+
   const title = useRef<HTMLInputElement>(null)
   const description = useRef<HTMLTextAreaElement>(null)
   const dueDate = useRef<HTMLInputElement>(null)
@@ -23,6 +27,7 @@ export default function NewProject({ onAdd }: NewProjectProps) {
     const enteredDueDate = dueDate.current?.value
 
     if (!enteredTitle || !enteredDescription || !enteredDueDate) {
+      modal.current?.showModal()
       return
     }
 
@@ -34,25 +39,37 @@ export default function NewProject({ onAdd }: NewProjectProps) {
   }
 
   return (
-    <div className="w-[35rem] mt-16">
-      <menu className="flex items-center justify-end gap-4 my-4">
-        <li>
-          <button className="text-stone-800 hover:text-stone-950 cursor-pointer">Cancel</button>
-        </li>
-        <li>
-          <button
-            className="px-6 py-2 rounded-md bg-stone-800 text-stone-500 hover:bg-stone-950"
-            onClick={handleSave}
-          >
-            Save
-          </button>
-        </li>
-      </menu>
-      <div>
-        <Input type="text" ref={title} label="Title" />
-        <Input ref={description} label="Description" textarea />
-        <Input ref={dueDate} type="date" label="Due Date" />
+    <>
+      <Modal ref={modal} buttonCaption="Okay">
+        <h2 className='text-xl font-bold text-stone-700 my-4'>Invalid input</h2>
+        <p className="text-stone-600 mb-4">Oops ... looks like you forgot to enter a value.</p>
+        <p className="text-stone-600 mb-4">Please make sure your provide a valid value for every input field.</p>
+      </Modal>
+
+      <div className="w-[35rem] mt-16">
+        <menu className="flex items-center justify-end gap-4 my-4">
+          <li>
+            <button
+              className="text-stone-800 hover:text-stone-950 cursor-pointer"
+              onClick={onCancel}>
+              Cancel
+            </button>
+          </li>
+          <li>
+            <button
+              className="px-6 py-2 rounded-md bg-stone-800 text-stone-500 hover:bg-stone-950"
+              onClick={handleSave}
+            >
+              Save
+            </button>
+          </li>
+        </menu>
+        <div>
+          <Input type="text" ref={title} label="Title" />
+          <Input ref={description} label="Description" textarea />
+          <Input ref={dueDate} type="date" label="Due Date" />
+        </div>
       </div>
-    </div>
+    </>
   )
 }
